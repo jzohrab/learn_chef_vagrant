@@ -1,20 +1,50 @@
 # Install the ChefDK on a VM.
 
-$SCRIPT = <<-END
+$WORKSTATION_SETUP = <<-END
 # Install chef dk v0.10.0 (Ref https://github.com/chef/chef-dk)
 # Hardcoding v. 0.10.0, as script was hanging when using "-c current"
 apt-get install -y curl tree
 curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -v 0.10.0 -P chefdk
 END
 
+$SERVER_SETUP = <<-END
+# Install chef server
+# (Ref https://docs.chef.io/release/server_12-3/install_server.html)
+
+# Hardcoding server version.
+file=https://packagecloud.io/chef/stable/packages/ubuntu/trusty/chef-server-core_12.3.1-1_amd64.deb/download
+
+mkdir -p /tmp
+echo Downloading $file ...
+wget $file -O /tmp/server.deb 2>/dev/null
+dpkg -i /tmp/server.deb
+chef-server-ctl reconfigure
+
+# Create admin and org
+chef-server-ctl user-create admin Admin Admin admin@somewhere.com 'admin' --filename /tmp/admin.pem
+chef-server-ctl org-create short_name "test_org" --association_user admin --filename /tmp/testorg-validator.pem
+
+# Chef Manage web UI
+chef-server-ctl install opscode-manage
+chef-server-ctl reconfigure
+opscode-manage-ctl reconfigure
+
+END
+
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
 
+  config.vm.define :workstation do |w|
+    w.vm.hostname = "workstation"
+    w.vm.network "forwarded_port", guest: 80, host: 8080
+    w.vm.synced_folder "chef-repo/", "/home/vagrant/chef-repo", create: true
+    w.vm.provision "shell", inline: $WORKSTATION_SETUP
+  end
+
   config.vm.define :server do |srv|
     srv.vm.hostname = "server"
-    srv.vm.network "forwarded_port", guest: 80, host: 8080
-    srv.vm.synced_folder "chef-repo/", "/home/vagrant/chef-repo", create: true
-    srv.vm.provision "shell", inline: $SCRIPT
+    srv.vm.network "forwarded_port", guest: 80, host: 8081
+    srv.vm.provision "shell", inline: $SERVER_SETUP
   end
 
 end
