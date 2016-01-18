@@ -16,13 +16,22 @@ file=https://packagecloud.io/chef/stable/packages/ubuntu/trusty/chef-server-core
 
 mkdir -p /tmp
 echo Downloading $file ...
-wget $file -O /tmp/server.deb 2>/dev/null
+if [ -f /vagrant/server.deb ]; then
+  echo File already downloaded, copying ...
+  cp /vagrant/server.deb /tmp/server.deb
+else
+  wget $file -O /tmp/server.deb 2>/dev/null
+fi
 dpkg -i /tmp/server.deb
 chef-server-ctl reconfigure
 
+echo stopping now
+exit 0
+
 # Create admin and org
-chef-server-ctl user-create admin Admin Admin admin@somewhere.com 'admin' --filename /tmp/admin.pem
-chef-server-ctl org-create short_name "test_org" --association_user admin --filename /tmp/testorg-validator.pem
+# Password must have at least 6 characters
+chef-server-ctl user-create localadmin Local Admin localadmin@local.com 'adminpassword' --filename /tmp/admin.pem
+chef-server-ctl org-create short_name "test_org" --association_user localadmin --filename /tmp/testorg-validator.pem
 
 # Chef Manage web UI
 chef-server-ctl install opscode-manage
@@ -41,9 +50,15 @@ Vagrant.configure("2") do |config|
     w.vm.provision "shell", inline: $WORKSTATION_SETUP
   end
 
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 4096
+    v.cpus = 2
+  end
+  
   config.vm.define :server do |srv|
     srv.vm.hostname = "server"
     srv.vm.network "forwarded_port", guest: 80, host: 8081
+    srv.vm.network "forwarded_port", guest: 443, host: 8082
     srv.vm.provision "shell", inline: $SERVER_SETUP
   end
 

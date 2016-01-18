@@ -1,7 +1,10 @@
 # Chef DK Vagrant box
 
 This provides an Ubuntu development environment for the tutorials at
-[learnchef](https://learn.chef.io).
+[learnchef](https://learn.chef.io).  The Vagrant file provides:
+
+* a development workstation (the `workstation` node)
+* a local Chef server (the `server` node)
 
 The introductory [tutorial](https://learn.chef.io/)
 recommends setting up a disposable VM and installing ChefDK in it, as
@@ -17,15 +20,18 @@ the guest machine and apply recipes.
 ## Usage
 
 * clone this repository, or copy the Vagrantfile to your local machine.
-* Run `vagrant up` to set up the ubuntu VM with the Chef DK.  This
-  also creates a `chef-repo` synced file in the local folder (ignored
-  by git).
+
+* Run `vagrant up workstation` to set up an ubuntu VM with the Chef
+  DK.  This also creates a `chef-repo` synced directory in the local
+  folder (ignored by git).
+  
+* Run `vagrant up server` to set up an ubuntu VM and Chef server.  This takes several minutes!  It also all
 
 ### Creating cookbooks
 
 Generate a cookbook in the VM:
 
-    vagrant ssh
+    vagrant ssh workstation
     cd ~/chef-repo
     chef generate cookbook learn_chef_apache2
 
@@ -41,7 +47,7 @@ Running recipes or cookbooks will change the hosted VM, and so the
 commands will need to be run as root.  Either use `sudo` or `su` with
 password vagrant, e.g.:
 
-    $ vagrant ssh
+    $ vagrant ssh workstation
     ...
     vagrant@server:~$ su
     Password:   # the password is vagrant
@@ -52,10 +58,15 @@ password vagrant, e.g.:
 
 ## Shutdown
 
-Use `vagrant [halt|suspend|destroy]` to stop, depending on how you
-want to shut down.  See the [Vagrant
+Note: see the [Vagrant
 documentation](https://docs.vagrantup.com/v2/getting-started/teardown.html)
-for details.
+for details on shutting down VMs.
 
-Using `chef destroy` will *not* delete any recipes or cookbooks you're
+Use `vagrant [halt|suspend|destroy] workstation` to stop your
+workstation VM, depending on how you want to shut down.  
+
+Using `vagrant destroy workstation` will *not* delete any recipes or cookbooks you're
 editing in the `chef-repo/`.
+
+Since provisioning the Chef server VM takes a while, you may wish to
+only use `vagrant halt server` for the server VM.
