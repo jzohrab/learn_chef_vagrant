@@ -57,5 +57,5 @@ want to shut down.  See the [Vagrant
 documentation](https://docs.vagrantup.com/v2/getting-started/teardown.html)
 for details.
 
-Using `chef destroy` will *not* delete any recipes or cookbooks you're
+Using `vagrant destroy` will *not* delete any recipes or cookbooks you're
 editing in the `chef-repo/`.
