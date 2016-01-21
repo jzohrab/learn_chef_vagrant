@@ -74,8 +74,13 @@ vagrant user.  You can provision this node as follows:
     vagrant@workstation:~$ cd chef-repo/
     vagrant@workstation:~/chef-repo$ knife bootstrap 192.168.1.10 --ssh-user vagrant --ssh-password 'vagrant' --sudo --use-sudo-password --node-name node1 --run-list 'recipe[learn_chef_apache2]'
 
+And to re-run the client:
+
+    $ vagrant ssh workstation
+    vagrant@workstation:~/chef-repo$ knife ssh 192.168.1.10 'sudo chef-client' --manual-list --ssh-user vagrant --ssh-password 'vagrant'
+
 The host machine's port 8081 is forwarded to the `node` guest VM's
-port 80, so when the provisioning is complete you can view the results
+port 80, so when the provisioning is complete you can view any results
 in your browser at http://localhost:8081/.
 
 #### Troubleshooting
