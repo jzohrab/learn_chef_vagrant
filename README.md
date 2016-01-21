@@ -78,6 +78,32 @@ The host machine's port 8081 is forwarded to the `node` guest VM's
 port 80, so when the provisioning is complete you can view the results
 in your browser at http://localhost:8081/.
 
+#### Troubleshooting
+
+* ensure the node is up
+
+* Chef encountered an error attempting to create the client "node1"
+
+If you destroy and recreate the node locally with vagrant, you'll want
+to delete the corresponding node from the Chef server.  If using
+Hosted Chef, delete the node from
+`https://manage.chef.io/organizations/YOUR_ORG/nodes`.
+
+* ERROR: Your private key could not be loaded from /etc/chef/client.pem
+
+Run bootstrapping, etc. from the `chef-repo` directory on the workstation.
+
+* Net::SSH::HostKeyMismatch
+
+If you ssh to the workstation and run `knife bootstrap`, the
+bootstrapped node's fingerprint will be stored in the workstation's
+`~/.ssh/known_hosts` file.  If you destroy and recreate the node,
+subsequent bootstraps will fail as the fingerprint changes.  Run the
+following on the workstation to allow for re-bootstrapping of the
+node:
+
+    sed -i 's/192.168.1.10.*//' ~/.ssh/known_hosts
+
 
 ## Shutdown
 
