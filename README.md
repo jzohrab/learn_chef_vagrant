@@ -16,12 +16,11 @@ the guest machine and apply recipes.
 
 ## Usage
 
-* clone this repository, or copy the Vagrantfile to your local machine.
-
+* Create a directory, and copy the Vagrantfile to your local machine.
+  Optionally, clone this repository.
 * Run `vagrant up workstation` to set up the ubuntu VM with the Chef
   DK.  This also creates a `chef-repo` synced file in the local folder
   (ignored by git).
-
 * Run `vagrant up node` to create a new node that Chef will manage.
 
 ### Creating cookbooks
@@ -85,20 +84,26 @@ in your browser at http://localhost:8081/.
 
 #### Troubleshooting
 
-* ensure the node is up
+**1. Ensure the node is up**
 
-* Chef encountered an error attempting to create the client "node1"
+Run `vagrant up node` before attempting to provision it.
+
+**2. Chef encountered an error attempting to create the client "node1"**
 
 If you destroy and recreate the node locally with vagrant, you'll want
 to delete the corresponding node from the Chef server.  If using
 Hosted Chef, delete the node from
-`https://manage.chef.io/organizations/YOUR_ORG/nodes`.
+`https://manage.chef.io/organizations/YOUR_ORG/nodes`.  You can do
+this using the web UI, or can use knife:
 
-* ERROR: Your private key could not be loaded from /etc/chef/client.pem
+    knife node delete <node_name> --yes
+    knife client delete <node_name> --yes
+
+**3. ERROR: Your private key could not be loaded from /etc/chef/client.pem**
 
 Run bootstrapping, etc. from the `chef-repo` directory on the workstation.
 
-* Net::SSH::HostKeyMismatch
+**4. Net::SSH::HostKeyMismatch**
 
 If you ssh to the workstation and run `knife bootstrap`, the
 bootstrapped node's fingerprint will be stored in the workstation's
